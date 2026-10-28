@@ -7,10 +7,7 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "scripts": {
-    "check-types": "tsc --noEmit"
-  },
   "dependencies": {
-    "@sinclair/typebox": "^0.32.0"
+    "elysia": "^1.1.0"
   }
 }

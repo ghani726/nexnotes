@@ -1,18 +1,16 @@
 {
-  "name": "main_app",
+  "name": "notes-mono-repo",
   "private": true,
-  "packageManager": "bun@1.4.3",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
-  "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "check-types": "turbo check-types"
+  "packageManager": "bun@1.4.2",
+  "overrides": {
+    "@sinclair/typebox": "^0.34.0",
+    "elysia": "^1.1.0"
   },
-  "devDependencies": {
-    "turbo": "^2.0.0",
-    "typescript": "^5.0.0"
+  "scripts": {
+    "dev": "turbo dev"
   }
 }

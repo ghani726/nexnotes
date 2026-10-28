@@ -1,9 +1,9 @@
-import { Type, Static } from '@sinclair/typebox';
+import { t, Static } from 'elysia';
 
-export const UserSignupSchema = Type.Object({
-  email: Type.String({ format: 'email' }),
-  password: Type.String({ minLength: 8 }),
-  customRole: Type.Union([Type.Literal('admin'), Type.Literal('user')])
+export const UserSignupSchema = t.Object({
+  email: t.String({ format: 'email' }),
+  password: t.String({ minLength: 8 }),
+  customRole: t.Union([t.Literal('admin'), t.Literal('user')])
 });
 
 export type UserSignupInput = Static<typeof UserSignupSchema>;

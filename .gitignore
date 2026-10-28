@@ -2,6 +2,9 @@
 node_modules/
 .pnp
 .pnp.js
+.env
+apps/server/.env/
+apps/web/.env/
 
 # Testing
 coverage/

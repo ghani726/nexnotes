@@ -1,0 +1,133 @@
+// ==========================================
+// 1. CONFIGURATION & GENERATORS
+// ==========================================
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 2. ENUMS
+// ==========================================
+
+enum Permission {
+  VIEWER
+  EDITOR
+}
+
+enum ShareStatus {
+  PENDING
+  ACCEPTED  
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// ==========================================
+// 3. TABLES (MODELS)
+// ==========================================
+
+// 1. USERS MODEL
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  username        String?  @unique
+  fullName        String?
+  password        String?  // Null if signed up via Google
+  avatarUrl       String?  // Stores Google picture URL or custom upload
+  
+  // Auth Tracking Flags
+  isEmailVerified Boolean  @default(false)
+  isGoogleLinked  Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Restored Relations
+  notes           Note[]       @relation("NoteOwner")
+  tasks           Task[]       @relation("TaskOwner")
+  sessions        Session[]
+  sentShares      SharedNote[] @relation("SharesSent")
+  receivedShares  SharedNote[] @relation("SharesReceived")
+}
+
+// 2. SESSIONS MODEL
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// 3. NOTES MODEL
+model Note {
+  id         String       @id @default(uuid())
+  title      String
+  content    String?      @db.Text
+  color      Int          @default(0)          // Stores a number (0, 1, 2, 3...) for note styling/themes
+  isPinned   Boolean      @default(false)
+  isArchived Boolean      @default(false)
+  
+  // Soft Delete & 7-Day Trash Bin Fields
+  isDeleted  Boolean      @default(false)
+  deletedAt  DateTime?
+
+  // Public Web Sharing Fields
+  isPublic   Boolean      @default(false)
+  publicId   String?      @unique
+
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  userId     String
+  user       User         @relation("NoteOwner", fields: [userId], references: [id], onDelete: Cascade)
+  
+  tasks      Task[]
+  shares     SharedNote[]
+}
+
+// 4. TASKS MODEL
+model Task {
+  id          String       @id @default(uuid())
+  title       String
+  isCompleted Boolean      @default(false)
+  dueDate     DateTime?
+  priority    TaskPriority @default(MEDIUM)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  userId      String
+  noteId      String?
+
+  user        User         @relation("TaskOwner", fields: [userId], references: [id], onDelete: Cascade)
+  note        Note?        @relation(fields: [noteId], references: [id], onDelete: Cascade)
+}
+
+// 5. SHARED NOTES MODEL (Join Table)
+model SharedNote {
+  id           String      @id @default(uuid())
+  noteId       String
+  sharedById   String
+  sharedWithId String
+
+  permission   Permission  @default(VIEWER)
+  status       ShareStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  note         Note        @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  sharedBy     User        @relation("SharesSent", fields: [sharedById], references: [id], onDelete: Cascade)
+  sharedWith   User        @relation("SharesReceived", fields: [sharedWithId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, sharedWithId])
+}

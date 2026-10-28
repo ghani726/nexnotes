@@ -1,0 +1,25 @@
+import { MetadataRoute } from "next";
+
+const manifest = (): MetadataRoute.Manifest => {
+    return {
+        name: "NexNotes Workspace",
+        short_name: "NexNotes",
+        description: "Smart workspace and notes management system.",
+        start_url: "/",
+        display: "standalone",
+        background_color: "#f3f4f6",
+        theme_color: "#5d2bff",
+        icons: [{ src: "/favicon.ico", sizes: "192X192", type: "image/ico" }],
+        screenshots: [
+            {
+                src: "/Register_Page.png",
+                sizes: "1280*1024",
+                
+                type: "image/png",
+                form_factor: "wide",
+            },
+        ],
+    };
+};
+
+export default manifest;
