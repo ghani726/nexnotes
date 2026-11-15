@@ -1,16 +1,21 @@
 {
-  "name": "notes-mono-repo",
-  "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "packageManager": "bun@1.4.2",
-  "overrides": {
-    "@sinclair/typebox": "^0.34.0",
-    "elysia": "^1.1.0"
-  },
-  "scripts": {
-    "dev": "turbo dev"
-  }
+    "name": "notes-mono-repo",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "packageManager": "npm@11.17.0",
+    "scripts": {
+        "dev": "turbo run dev",
+        "build": "turbo run build",
+        "check-types": "turbo run check-types",
+        "lint": "turbo run lint"
+    },
+    "devDependencies": {
+        "turbo": "^2.5.0"
+    },
+    "overrides": {
+        "minimatch": "11.0.1"
+    }
 }

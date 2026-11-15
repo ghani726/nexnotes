@@ -1,4 +1,5 @@
 {
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
         "target": "ES2017",
         "lib": ["dom", "dom.iterable", "esnext"],
@@ -6,6 +7,7 @@
         "skipLibCheck": true,
         "strict": true,
         "noEmit": true,
+        "allowImportingTsExtensions": true,
         "esModuleInterop": true,
         "module": "esnext",
         "moduleResolution": "bundler",
@@ -19,8 +21,9 @@
             }
         ],
         "paths": {
-            "@/*": ["./*"]
-        }
+            "@/*": ["./src/*"],
+            "@packages/*": ["../../packages/*"]
+        },
     },
     "include": [
         "next-env.d.ts",
@@ -28,7 +31,7 @@
         "**/*.tsx",
         ".next/types/**/*.ts",
         ".next/dev/types/**/*.ts",
-        "**/*.mts"
-, "public/theme.js", "app/manifest.ts.bak", "eslint.config.mjs"    ],
+        "../../packages/*"
+    ],
     "exclude": ["node_modules"]
 }

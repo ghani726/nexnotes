@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    /* config options here */
-    
     cacheComponents: false,
     partialPrefetching: false,
     reactCompiler: true,
@@ -14,6 +12,7 @@ const nextConfig: NextConfig = {
             },
         },
     },
+    
     redirects: async () => {
         return [
             { source: "/sign-in", destination: "/login", permanent: true },

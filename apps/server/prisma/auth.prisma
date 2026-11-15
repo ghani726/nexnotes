@@ -1,0 +1,153 @@
+// =========================================================
+// ------------------------> ENUMS <------------------------
+// =========================================================
+
+
+enum AuthChallengePurpose {
+  MFA_LOGIN
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+}
+
+enum AuthProvider {
+  GOOGLE
+  APPLE
+  GITHUB
+  FACEBOOK
+  MICROSOFT
+}
+
+enum IntegrationProvider {
+  GOOGLE_DRIVE
+  DROPBOX
+  ONEDRIVE
+}
+
+
+// =========================================================
+// ------------------------> TABLE <------------------------
+// =========================================================
+
+
+// 1. USERS MODEL
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  userName        String?  @unique
+  fullName        String?
+  password        String?  // Stores Password hash, null be default if registered by external service, can be set later
+  avatarUrl       String?  // Stores External Service picture URL or custom upload
+  emailVerified        DateTime? //By default null, when verified it stores the exact time it was verified.
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  collections     Collection[] @relation("UserCollections")
+  notes           Note[]       @relation("NoteOwner")
+  tasks           Task[]       @relation("TaskOwner")
+  sessions        Session[]
+  sentShares      SharedNote[] @relation("SharesSent")
+  receivedShares  SharedNote[] @relation("SharesReceived")
+  authChallenges  AuthChallenge[]
+  mfaFactor       MfaFactor?
+  userAccounts     UserAccount[]
+  userIntegrations UserIntegration[]
+}
+
+// 2. SESSIONS MODEL
+model Session {
+  id        String   @id @default(uuid())
+  userID    String
+  token     String   @unique // Stores the SHA-512 Hash of actual token
+  deviceInfo   Json?    // <-- Stores your device info object
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+  user      User     @relation(fields: [userID], references: [id], onDelete: Cascade)
+}
+
+
+// 3. AuthChallenges model
+model AuthChallenge {
+  id        String               @id @default(uuid())
+  userID    String
+
+  purpose   AuthChallengePurpose
+  tokenHash String               @unique
+  createdAt DateTime             @default(now())
+
+  user      User                 @relation( fields: [userID], references: [id], onDelete: Cascade)
+
+  @@index([userID, purpose, createdAt])
+}
+
+
+// 4. MFA Factor
+
+model MfaFactor {
+  id              String    @id @default(uuid())
+  userID          String    @unique
+
+  secretEncrypted String
+  confirmedAt     DateTime?
+  lastUsedStep    Int?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation( fields: [userID], references: [id], onDelete: Cascade)
+
+  recoverCodes MfaRecoveryCode[]
+}
+
+// 5. MFA Recovery Codes
+model MfaRecoveryCode {
+  id          String    @id @default(uuid())
+  mfaFactorId String
+
+  codeHash    String    @unique
+  usedAt      DateTime?
+
+  createdAt   DateTime  @default(now())
+
+  mfaFactor   MfaFactor @relation( fields: [mfaFactorId], references: [id], onDelete: Cascade)
+
+  @@index([mfaFactorId, usedAt])
+}
+
+
+// 6. Account like Google, Apple, exact
+model UserAccount {
+  id                String   @id @default(uuid())
+  userID            String
+  provider          AuthProvider
+  providerAccountId String   
+  createdAt         DateTime @default(now()) 
+
+  user User @relation(fields: [userID], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userID])
+}
+
+
+// 7. USER INTEGRATIONS MODEL
+model UserIntegration {
+  id           String    @id @default(uuid())
+  userID       String
+  provider     IntegrationProvider       // 1 = Google Drive, 2 = Dropbox, etc.
+
+  accessToken  String    // Encrypted OAuth access token
+  refreshToken String?   // Encrypted OAuth refresh token
+  expiresAt    DateTime?
+  scopes       Json      @default("[]") // Permissions granted by the user
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  user         User      @relation(fields: [userID], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([userID, provider])
+}
